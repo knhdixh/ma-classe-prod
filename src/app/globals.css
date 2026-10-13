@@ -1,0 +1,277 @@
+@import "tailwindcss";
+
+/* Palette: paper, ink, the teacher's red pen, highlighter, classroom blue. */
+:root {
+  --paper: #f3f5f8;
+  --surface: #ffffff;
+  --surface-2: #e9edf3;
+  --ink: #1a2230;
+  --muted: #5a6477;
+  --line: #d6dce6;
+  --pen: #c42f27;
+  --pen-soft: #fbe6e4;
+  --hl: #ffe57a;
+  --hl-ink: #1a2230;
+  /* Usage meter fill near a limit: at least 3:1 against --surface-2. */
+  --warn: #b26a00;
+  --good: #23784a;
+  --good-soft: #e1f2e8;
+  --blue: #2949c9;
+  --blue-soft: #e4e9fb;
+}
+
+/* Dark: chosen with the theme switch, or following a dark computer when set to Auto. */
+:root[data-theme="dark"] {
+  --paper: #11151c;
+  --surface: #19202a;
+  --surface-2: #222b37;
+  --ink: #e6eaf1;
+  --muted: #9ba5b6;
+  --line: #2d3644;
+  --pen: #ff6f62;
+  --pen-soft: #3a1f1f;
+  --hl: #6b5815;
+  --hl-ink: #fff3c4;
+  --warn: #e9a23b;
+  --good: #5fc78d;
+  --good-soft: #17301f;
+  --blue: #8ea7ff;
+  --blue-soft: #1f2846;
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #11151c;
+    --surface: #19202a;
+    --surface-2: #222b37;
+    --ink: #e6eaf1;
+    --muted: #9ba5b6;
+    --line: #2d3644;
+    --pen: #ff6f62;
+    --pen-soft: #3a1f1f;
+    --hl: #6b5815;
+    --hl-ink: #fff3c4;
+    --warn: #e9a23b;
+    --good: #5fc78d;
+    --good-soft: #17301f;
+    --blue: #8ea7ff;
+    --blue-soft: #1f2846;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-pen: var(--pen);
+  --color-pen-soft: var(--pen-soft);
+  --color-hl: var(--hl);
+  --color-hl-ink: var(--hl-ink);
+  --color-warn: var(--warn);
+  --color-good: var(--good);
+  --color-good-soft: var(--good-soft);
+  --color-blue: var(--blue);
+  --color-blue-soft: var(--blue-soft);
+
+  --font-sans: var(--font-plex), ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+  --font-display: var(--font-bricolage), var(--font-plex), ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  body {
+    /* Seyès ruling (French "grands carreaux" exercise book): faint lines every 2 mm,
+       a stronger one every 8 mm, verticals every 8 mm, and the red margin line. */
+    --seyes-fine: color-mix(in srgb, var(--blue) 6%, transparent);
+    --seyes-main: color-mix(in srgb, var(--blue) 13%, transparent);
+    --seyes-margin: color-mix(in srgb, var(--pen) 42%, transparent);
+    --seyes-margin-x: 72px;
+    background-color: var(--paper);
+    background-image:
+      linear-gradient(to right, transparent calc(var(--seyes-margin-x) - 1px), var(--seyes-margin) calc(var(--seyes-margin-x) - 1px), var(--seyes-margin) calc(var(--seyes-margin-x) + 1px), transparent calc(var(--seyes-margin-x) + 1px)),
+      linear-gradient(to bottom, var(--seyes-main) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--seyes-fine) 1px, transparent 1px),
+      linear-gradient(to right, var(--seyes-fine) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 32px, 100% 8px, 32px 100%;
+    background-position: 0 0, 0 0, 0 0, var(--seyes-margin-x) 0;
+    background-attachment: fixed;
+    color: var(--ink);
+    /* @theme inline does not override the root --font-sans, so name the faces directly. */
+    font-family: var(--font-plex), ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+    font-size: 1rem;
+    line-height: 1.55;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-bricolage), var(--font-plex), ui-sans-serif, system-ui, sans-serif;
+    line-height: 1.15;
+    text-wrap: balance;
+  }
+
+  /* Tailwind v4 resets buttons to the default arrow cursor; anything clickable shows a hand. */
+  button:not(:disabled, [aria-disabled="true"]),
+  [role="button"]:not([aria-disabled="true"]),
+  select:not(:disabled),
+  summary,
+  label:has(> select),
+  a[href] {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  button[aria-disabled="true"],
+  select:disabled,
+  input:disabled {
+    cursor: not-allowed;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--blue);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: var(--hl);
+    color: var(--hl-ink);
+  }
+}
+
+@layer components {
+  /* One button family: same height, radius, weight and states everywhere. */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 2.5rem;
+    padding: 0 1.125rem;
+    border-radius: 0.625rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+    transition:
+      background-color 120ms ease,
+      border-color 120ms ease,
+      color 120ms ease;
+  }
+  .btn:disabled,
+  .btn[aria-disabled="true"] {
+    opacity: 0.6;
+  }
+
+  .btn-primary {
+    background: var(--blue);
+    color: var(--surface);
+  }
+  .btn-primary:not(:disabled, [aria-disabled="true"]):hover {
+    background: color-mix(in srgb, var(--blue) 86%, var(--ink));
+  }
+
+  .btn-secondary {
+    background: var(--surface);
+    color: var(--ink);
+    border: 1px solid var(--line);
+  }
+  .btn-secondary:not(:disabled, [aria-disabled="true"]):hover {
+    background: var(--surface-2);
+  }
+
+  .btn-danger {
+    background: var(--pen);
+    color: var(--surface);
+  }
+  .btn-danger:not(:disabled):hover {
+    background: color-mix(in srgb, var(--pen) 86%, var(--ink));
+  }
+
+  .btn-sm {
+    min-height: 2rem;
+    padding: 0 0.75rem;
+    font-size: 0.8125rem;
+    border-radius: 0.5rem;
+  }
+
+  /* Inputs and selects share one shape with the buttons. */
+  .field {
+    width: 100%;
+    min-height: 2.5rem;
+    padding: 0 0.75rem;
+    border: 1px solid var(--line);
+    border-radius: 0.625rem;
+    background: var(--surface);
+    color: var(--ink);
+    font-size: 0.9375rem;
+    transition: border-color 120ms ease;
+  }
+  .field:hover {
+    border-color: color-mix(in srgb, var(--line) 50%, var(--muted));
+  }
+  .field:focus-visible {
+    border-color: var(--blue);
+    outline-offset: 0;
+  }
+
+  .field-label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--ink);
+  }
+
+  .link {
+    color: var(--blue);
+    font-weight: 500;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
+  .link:hover {
+    text-decoration-thickness: 2px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 0.875rem;
+  }
+}
+
+@media (max-width: 640px) {
+  body {
+    --seyes-margin-x: 8px;
+  }
+}
+
+/* Dark mode: chalk-like lines on the slate. */
+:root[data-theme="dark"] body {
+  --seyes-fine: color-mix(in srgb, var(--ink) 5%, transparent);
+  --seyes-main: color-mix(in srgb, var(--ink) 9%, transparent);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) body {
+    --seyes-fine: color-mix(in srgb, var(--ink) 5%, transparent);
+    --seyes-main: color-mix(in srgb, var(--ink) 9%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
+  }
+}
