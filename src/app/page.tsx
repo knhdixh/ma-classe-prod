@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { estimateUsage, monthStart } from '@/features/usage/estimate';
+import { heartbeatStatus } from '@/features/usage/heartbeat';
+import { HeartbeatMeter } from '@/features/usage/HeartbeatMeter';
 import { UsageMeter } from '@/features/usage/UsageMeter';
 import { LanguageSwitch } from '@/components/LanguageSwitch';
 import { ThemeSwitch } from '@/components/ThemeSwitch';
@@ -10,6 +12,7 @@ import { formatLessonDate } from '@/lib/i18n/messages';
 import { getLocale, getT, getThemePref, getTimeZone } from '@/lib/i18n/server';
 import { minutesBetween } from '@/lib/lessons/duration';
 import type { Lesson } from '@/lib/lessons/types';
+import { adminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 import { startLesson } from './actions';
 import { LivePoller } from './LivePoller';
@@ -27,10 +30,11 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
   const supabase = await createClient();
   const now = new Date();
   const since = monthStart(now).toISOString();
-  const [{ data, error }, usageLessons, usageFiles] = await Promise.all([
+  const [{ data, error }, usageLessons, usageFiles, pings] = await Promise.all([
     supabase.from('lessons').select('id, title, status, started_at, ended_at').order('started_at', { ascending: false }).limit(50),
     supabase.from('lessons').select('started_at, ended_at').or(`ended_at.is.null,ended_at.gte.${since}`),
     supabase.from('files').select('size_bytes'),
+    loadHeartbeats(),
   ]);
   // An outage goes to the error page, not to an empty "No lessons yet."
   if (error) throw new Error('Could not load lessons', { cause: error });
@@ -47,6 +51,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
           fileBytes: (usageFiles.data ?? []).map((f) => Number(f.size_bytes)),
           now,
         });
+
+  const heartbeats = pings === null ? null : heartbeatStatus(pings, now);
 
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-col gap-10 px-4 py-10">
@@ -128,6 +134,20 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
       </section>
 
       <UsageMeter usage={usage} t={t} locale={locale} />
+      <HeartbeatMeter items={heartbeats} t={t} locale={locale} />
     </main>
   );
+}
+
+/**
+ * The keep-alive rows. RLS lets nobody read `heartbeats` (migration 0008), so the server reads it with the
+ * service role; only the times reach the page. Secondary, like the usage meter: any failure shows a note.
+ */
+async function loadHeartbeats(): Promise<{ source: string; at: string }[] | null> {
+  try {
+    const { data, error } = await adminClient().from('heartbeats').select('source, at');
+    return error ? null : (data ?? []);
+  } catch {
+    return null;
+  }
 }

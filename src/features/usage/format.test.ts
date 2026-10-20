@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { UsageItem } from './estimate';
-import { usageAmounts } from './format';
+import { heartbeatAmounts, usageAmounts } from './format';
 
 const item = (key: UsageItem['key'], used: number): UsageItem => ({ key, used, limit: 1, ratio: 0, level: 'ok' });
 /** Intl puts no-break spaces (U+00A0, U+202F) between digit groups and before units. */
@@ -18,5 +18,13 @@ describe('usageAmounts', () => {
   it('storage in MB against the 1 GB limit, Mo and Go in French', () => {
     expect(plain(usageAmounts(item('storage', 12 * 1024 ** 2), 'en'))).toBe('12 MB / 1 GB');
     expect(plain(usageAmounts(item('storage', 12 * 1024 ** 2), 'fr'))).toBe('12 Mo / 1 Go');
+  });
+});
+
+describe('heartbeatAmounts', () => {
+  it('minutes, then hours, then days against the 7-day limit', () => {
+    expect(plain(heartbeatAmounts(25 * 60000, 'en'))).toBe('25 min / 7 days');
+    expect(plain(heartbeatAmounts(30 * 3600_000, 'en'))).toBe('30 hr / 7 days');
+    expect(plain(heartbeatAmounts(3.5 * 86400_000, 'fr'))).toBe('3,5 j / 7 j');
   });
 });

@@ -1,0 +1,30 @@
+name: Keep Supabase awake
+
+# Backup for the daily Vercel cron (/api/keepalive): Supabase pauses free projects after 7 days without activity.
+on:
+  schedule:
+    - cron: "17 5 */3 * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ping:
+    name: Heartbeat
+    # Only the repo Vercel deploys from has the variables below.
+    if: github.repository == 'knhdixh/ma-classe-prod'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Call heartbeat()
+        # Repo variables, not secrets: the URL and the publishable key are public (the browser has both).
+        env:
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ vars.SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          test -n "$SUPABASE_URL" && test -n "$SUPABASE_PUBLISHABLE_KEY" || { echo "::error::Set the SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY repo variables"; exit 1; }
+          curl --fail-with-body -sS -X POST "$SUPABASE_URL/rest/v1/rpc/heartbeat" \
+            -H "apikey: $SUPABASE_PUBLISHABLE_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{"source":"github-actions"}'
+          echo

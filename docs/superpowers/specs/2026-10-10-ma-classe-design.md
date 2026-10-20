@@ -249,7 +249,7 @@ vocab        (id uuid pk, lesson_id uuid fk null, french text, meaning_vi text, 
 | Board save fails | IndexedDB queue, retried every 10 s, warning after 3 failures |
 | Drive export fails | Toast: "Couldn't convert this file. Export it as PDF and upload it." |
 | PDF over 50 pages or over 30 MB | Rejected before upload, with a message |
-| Supabase pause | Vercel Cron calls `/api/keepalive` daily, which runs one trivial query |
+| Supabase pause | Vercel Cron calls `/api/keepalive` daily, which records a heartbeat (`public.heartbeat()`, migration 0008); a GitHub Actions workflow in the prod repo pings it every 3 days as a backup. The home page shows the last ping of each |
 | Free limit approaching | Usage meter on home warns at 70%. Minutes and data are estimated from lesson durations × 2 participants (× 540p bitrate for data); storage is the sum of `files.size_bytes`. |
 | Bad deploy | Rule: no production deploys during lesson times. Recover with Vercel instant rollback. |
 | Total failure | Plan B button opens a Google Meet link stored in config |

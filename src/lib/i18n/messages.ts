@@ -214,6 +214,14 @@ export const en = {
   'usage.warn': 'Over 70%: keep an eye on it',
   'usage.over': 'Free limit reached',
   'usage.unavailable': 'Usage couldn’t load. It will show again on the next visit.',
+  'keepalive.title': 'Database keep-alive',
+  'keepalive.note': 'The free database pauses after 7 days without a ping.',
+  'keepalive.vercel-cron': 'Daily ping (Vercel)',
+  'keepalive.github-actions': 'Backup ping (GitHub, every 3 days)',
+  'keepalive.never': 'No ping yet',
+  'keepalive.warn': 'Late: check that this ping still runs',
+  'keepalive.over': 'Over 7 days: the database may pause',
+  'keepalive.unavailable': 'The pings couldn’t load. They will show again on the next visit.',
 } as const;
 
 export type MessageKey = keyof typeof en;
@@ -432,6 +440,14 @@ export const fr: Record<MessageKey, string> = {
   'usage.warn': 'Plus de 70 % : à surveiller',
   'usage.over': 'Limite gratuite atteinte',
   'usage.unavailable': 'L’utilisation n’a pas pu se charger. Elle s’affichera à la prochaine visite.',
+  'keepalive.title': 'Maintien de la base de données',
+  'keepalive.note': 'La base gratuite se met en pause après 7 jours sans ping.',
+  'keepalive.vercel-cron': 'Ping quotidien (Vercel)',
+  'keepalive.github-actions': 'Ping de secours (GitHub, tous les 3 jours)',
+  'keepalive.never': 'Aucun ping pour l’instant',
+  'keepalive.warn': 'En retard : vérifiez que ce ping tourne encore',
+  'keepalive.over': 'Plus de 7 jours : la base peut se mettre en pause',
+  'keepalive.unavailable': 'Les pings n’ont pas pu se charger. Ils s’afficheront à la prochaine visite.',
 };
 
 const DICTS: Record<Locale, Record<MessageKey, string>> = { en, fr };
